@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピグミントン - Pigminton</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🐷 ピグミントン 🏸</h1>
+            <div id="score-board">
+                <div class="player-score">
+                    <span class="player-name">プレイヤー1</span>
+                    <span class="score" id="score-p1">0</span>
+                </div>
+                <div class="player-score">
+                    <span class="player-name">プレイヤー2</span>
+                    <span class="score" id="score-p2">0</span>
+                </div>
+            </div>
+        </header>
+
+        <canvas id="game-canvas"></canvas>
+
+        <div id="controls">
+            <div class="control-area player1-control">
+                <div class="pig-button" id="pig1" data-player="1">
+                    <div class="pig-face">🐷</div>
+                    <div class="wind-meter">
+                        <div class="wind-fill" id="wind1"></div>
+                    </div>
+                    <p>タップして風を送る</p>
+                </div>
+            </div>
+
+            <div class="control-area player2-control">
+                <div class="pig-button" id="pig2" data-player="2">
+                    <div class="pig-face">🐷</div>
+                    <div class="wind-meter">
+                        <div class="wind-fill" id="wind2"></div>
+                    </div>
+                    <p>タップして風を送る</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-info">
+            <button id="start-btn" class="btn-primary">ゲーム開始</button>
+            <button id="reset-btn" class="btn-secondary">リセット</button>
+            <button id="mic-toggle" class="btn-secondary">🎤 マイク入力</button>
+            <div id="mic-status" class="hidden">マイク: OFF</div>
+        </div>
+    </div>
+
+    <div id="instructions" class="modal hidden">
+        <div class="modal-content">
+            <h2>遊び方</h2>
+            <ul>
+                <li>🐷 ブタをタップして風を送り、羽根を相手側に返します</li>
+                <li>🏸 羽根を相手のコートに落とすと1点獲得</li>
+                <li>💨 強く長押しすると強い風が出ます</li>
+                <li>🎤 マイク入力モードで息を吹きかけることもできます</li>
+                <li>🎯 先に11点獲得したプレイヤーの勝利！</li>
+            </ul>
+            <button id="close-instructions" class="btn-primary">閉じる</button>
+        </div>
+    </div>
+
+    <script src="physics.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

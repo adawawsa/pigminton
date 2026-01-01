@@ -1,0 +1,281 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    overflow: hidden;
+}
+
+#game-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    max-width: 1200px;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #ff6b9d;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+#score-board {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+
+.player-score {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+    padding: 15px 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.player-name {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #2d3436;
+}
+
+.score {
+    display: block;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #d63031;
+    margin-top: 5px;
+}
+
+#game-canvas {
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(180deg, #74b9ff 0%, #a29bfe 100%);
+    border: 4px solid #2d3436;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto 20px;
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.control-area {
+    flex: 1;
+}
+
+.pig-button {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+    border: 4px solid #ff7675;
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.pig-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.pig-button.blowing {
+    animation: blow-pulse 0.3s ease-in-out;
+}
+
+@keyframes blow-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}
+
+.pig-face {
+    font-size: 4em;
+    text-align: center;
+    margin-bottom: 10px;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.pig-button p {
+    text-align: center;
+    font-weight: bold;
+    color: #2d3436;
+    font-size: 0.9em;
+}
+
+.wind-meter {
+    width: 100%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+    border: 2px solid #2d3436;
+}
+
+.wind-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00b894 0%, #00cec9 100%);
+    transition: width 0.1s ease-out;
+    border-radius: 8px;
+}
+
+#game-info {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+#mic-status {
+    padding: 10px 20px;
+    background: #dfe6e9;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+#mic-status.active {
+    background: #55efc4;
+    color: #00b894;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    color: #6c5ce7;
+    margin-bottom: 20px;
+}
+
+.modal-content ul {
+    list-style: none;
+    margin: 20px 0;
+}
+
+.modal-content li {
+    padding: 10px;
+    margin: 5px 0;
+    background: #f0f3ff;
+    border-radius: 8px;
+    font-size: 1.1em;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8em;
+    }
+
+    #controls {
+        flex-direction: column;
+    }
+
+    .pig-face {
+        font-size: 3em;
+    }
+
+    #game-canvas {
+        height: 300px;
+    }
+}
+
+/* 風のエフェクト */
+.wind-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: wind-flow 0.5s linear forwards;
+}
+
+@keyframes wind-flow {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
