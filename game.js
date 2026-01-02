@@ -9,7 +9,13 @@ class PigmintonGame {
 
         // キャンバスサイズの設定
         this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
+
+        // Resize debouncing
+        this.resizeTimeout = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(this.resizeTimeout);
+            this.resizeTimeout = setTimeout(() => this.resizeCanvas(), 300);
+        });
 
         // 物理世界の初期化
         this.world = new PhysicsWorld(this.canvas.width, this.canvas.height);
@@ -37,6 +43,7 @@ class PigmintonGame {
         this.micEnabled = false;
         this.audioContext = null;
         this.analyzer = null;
+        this.micDataArray = null; // 再利用するためのバッファ
 
         // UI要素
         this.elements = {
@@ -54,6 +61,15 @@ class PigmintonGame {
             closeInstructions: document.getElementById('close-instructions')
         };
 
+        // キャッシュされたグラデーション（パフォーマンス最適化）
+        this.cachedGradients = {
+            background: null,
+            shuttlecock: null
+        };
+
+        // 前回の風メーター値（DOM更新の最適化）
+        this.lastWindPercentages = { p1: -1, p2: -1 };
+
         this.initializeEvents();
         this.showInstructions();
     }
@@ -67,6 +83,28 @@ class PigmintonGame {
         if (this.world) {
             this.world.width = this.canvas.width;
             this.world.height = this.canvas.height;
+        }
+
+        // グラデーションをキャンバスサイズに合わせて再作成
+        this.createCachedGradients();
+    }
+
+    createCachedGradients() {
+        const ctx = this.ctx;
+        const h = this.canvas.height;
+
+        // 背景グラデーション
+        this.cachedGradients.background = ctx.createLinearGradient(0, 0, 0, h);
+        this.cachedGradients.background.addColorStop(0, '#74b9ff');
+        this.cachedGradients.background.addColorStop(1, '#a29bfe');
+
+        // 羽根のグラデーション（サイズは固定なので一度だけ作成）
+        const s = this.shuttlecock;
+        if (s) {
+            this.cachedGradients.shuttlecock = ctx.createRadialGradient(0, 0, 2, 0, 0, s.radius);
+            this.cachedGradients.shuttlecock.addColorStop(0, '#ffffff');
+            this.cachedGradients.shuttlecock.addColorStop(0.5, '#ffeaa7');
+            this.cachedGradients.shuttlecock.addColorStop(1, '#fdcb6e');
         }
     }
 
@@ -167,6 +205,9 @@ class PigmintonGame {
                 source.connect(this.analyzer);
                 this.analyzer.fftSize = 256;
 
+                // バッファを一度だけ作成（パフォーマンス最適化）
+                this.micDataArray = new Uint8Array(this.analyzer.frequencyBinCount);
+
                 this.micEnabled = true;
                 this.elements.micStatus.classList.remove('hidden');
                 this.elements.micStatus.classList.add('active');
@@ -190,20 +231,19 @@ class PigmintonGame {
     }
 
     processMicrophoneInput() {
-        if (!this.micEnabled || !this.analyzer) return;
+        if (!this.micEnabled || !this.analyzer || !this.micDataArray) return;
 
         const bufferLength = this.analyzer.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
 
         const checkMic = () => {
             if (!this.micEnabled) return;
 
-            this.analyzer.getByteFrequencyData(dataArray);
+            this.analyzer.getByteFrequencyData(this.micDataArray);
 
             // 低周波数帯域の平均振幅を計算（息の音は低周波ノイズ）
             let sum = 0;
             for (let i = 0; i < bufferLength / 4; i++) {
-                sum += dataArray[i];
+                sum += this.micDataArray[i];
             }
             const average = sum / (bufferLength / 4);
 
@@ -294,9 +334,18 @@ class PigmintonGame {
             }
         }
 
-        // UI更新（風メーター）
-        this.elements.wind1.style.width = this.wind1.getChargePercentage() + '%';
-        this.elements.wind2.style.width = this.wind2.getChargePercentage() + '%';
+        // UI更新（風メーター） - 値が変わった時のみ更新
+        const wind1Pct = Math.round(this.wind1.getChargePercentage());
+        const wind2Pct = Math.round(this.wind2.getChargePercentage());
+
+        if (wind1Pct !== this.lastWindPercentages.p1) {
+            this.elements.wind1.style.width = wind1Pct + '%';
+            this.lastWindPercentages.p1 = wind1Pct;
+        }
+        if (wind2Pct !== this.lastWindPercentages.p2) {
+            this.elements.wind2.style.width = wind2Pct + '%';
+            this.lastWindPercentages.p2 = wind2Pct;
+        }
 
         // 描画
         this.render();
@@ -312,11 +361,8 @@ class PigmintonGame {
         // 背景クリア
         ctx.clearRect(0, 0, w, h);
 
-        // グラデーション背景
-        const gradient = ctx.createLinearGradient(0, 0, 0, h);
-        gradient.addColorStop(0, '#74b9ff');
-        gradient.addColorStop(1, '#a29bfe');
-        ctx.fillStyle = gradient;
+        // グラデーション背景（キャッシュ使用）
+        ctx.fillStyle = this.cachedGradients.background;
         ctx.fillRect(0, 0, w, h);
 
         // コート境界線（中央）
@@ -410,13 +456,8 @@ class PigmintonGame {
         const rotation = Math.atan2(s.velocity.y, s.velocity.x);
         ctx.rotate(rotation);
 
-        // 羽根のグラデーション
-        const gradient = ctx.createRadialGradient(0, 0, 2, 0, 0, s.radius);
-        gradient.addColorStop(0, '#ffffff');
-        gradient.addColorStop(0.5, '#ffeaa7');
-        gradient.addColorStop(1, '#fdcb6e');
-
-        ctx.fillStyle = gradient;
+        // 羽根のグラデーション（キャッシュ使用）
+        ctx.fillStyle = this.cachedGradients.shuttlecock;
         ctx.beginPath();
         ctx.arc(0, 0, s.radius, 0, Math.PI * 2);
         ctx.fill();
