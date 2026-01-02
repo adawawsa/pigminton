@@ -32,7 +32,9 @@ class Vector2D {
     }
 
     distanceTo(v) {
-        return Math.sqrt(Math.pow(this.x - v.x, 2) + Math.pow(this.y - v.y, 2));
+        const dx = this.x - v.x;
+        const dy = this.y - v.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 }
 
@@ -211,11 +213,9 @@ class PhysicsWorld {
     update(deltaTime) {
         if (!this.shuttlecock) return;
 
-        // 風の力を更新
-        this.windForces.forEach(wind => wind.update(deltaTime));
-
-        // 各風の力を羽根に適用
+        // 風の力を更新し、同時に羽根に適用（パフォーマンス最適化）
         this.windForces.forEach(wind => {
+            wind.update(deltaTime);
             const windEffect = wind.applyToShuttlecock(this.shuttlecock);
             if (windEffect) {
                 this.shuttlecock.applyForce(windEffect.force);
